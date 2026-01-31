@@ -93,6 +93,13 @@ async def verify(token: str = Query(..., description="JWT token to verify")):
     return {"valid": True, "user": payload}
 
 
+# AWS Lambda handler (only loaded if mangum is installed)
+try:
+    from mangum import Mangum
+    handler = Mangum(app)
+except ImportError:
+    handler = None
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(

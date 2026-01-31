@@ -73,6 +73,22 @@ payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
 | `GET /auth/verify?token=xxx` | Verify token, returns `{ valid, user }` |
 | `GET /health` | Health check |
 
+## Deployment
+
+### Docker
+```bash
+docker build -t miauauth .
+docker run -p 8001:8001 --env-file .env miauauth
+```
+
+### AWS Lambda
+```bash
+pip install mangum
+```
+Set handler to `main.handler` and configure env vars in Lambda console.
+
+Works with API Gateway (REST or HTTP API) and Lambda Function URLs.
+
 ## Configuration
 
 | Variable | Description |
