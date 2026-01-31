@@ -82,12 +82,21 @@ docker run -p 8001:8001 --env-file .env miauauth
 ```
 
 ### AWS Lambda
-```bash
-pip install mangum
-```
-Set handler to `main.handler` and configure env vars in Lambda console.
 
-Works with API Gateway (REST or HTTP API) and Lambda Function URLs.
+**Option A: Manual zip upload**
+```bash
+cd lambda && chmod +x build.sh && ./build.sh
+```
+Upload `lambda/deployment.zip` to Lambda, set handler to `main.handler`.
+
+**Option B: SAM**
+```bash
+cd lambda
+sam build
+sam deploy --guided
+```
+
+Configure env vars in Lambda console or via SAM parameters.
 
 ## Configuration
 

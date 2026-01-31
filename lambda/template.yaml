@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: MiauAuth - osu! OAuth Identity Provider
+
+Parameters:
+  OsuClientId:
+    Type: String
+  OsuClientSecret:
+    Type: String
+    NoEcho: true
+  OsuRedirectUri:
+    Type: String
+  SecretKey:
+    Type: String
+    NoEcho: true
+  AllowedOrigins:
+    Type: String
+    Default: '*'
+  DefaultRedirect:
+    Type: String
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  MiauAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../
+      Handler: main.handler
+      Runtime: python3.11
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          OSU_CLIENT_ID: !Ref OsuClientId
+          OSU_CLIENT_SECRET: !Ref OsuClientSecret
+          OSU_REDIRECT_URI: !Ref OsuRedirectUri
+          SECRET_KEY: !Ref SecretKey
+          ALLOWED_ORIGINS: !Ref AllowedOrigins
+          DEFAULT_REDIRECT: !Ref DefaultRedirect
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins:
+            - '*'
+
+Outputs:
+  MiauAuthUrl:
+    Description: MiauAuth Function URL
+    Value: !GetAtt MiauAuthFunctionUrl.FunctionUrl
