@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import Config
 from utils.osu_api import OsuAPI
-from utils.jwt_utils import create_access_token
+from utils.jwt_utils import create_access_token, verify_access_token
 
 app = FastAPI(
     title="MiauAuth",
@@ -82,6 +82,15 @@ async def callback(
     })
 
     return RedirectResponse(url=f"{redirect_origin}?token={token}", status_code=302)
+
+
+@app.get("/auth/verify")
+async def verify(token: str = Query(..., description="JWT token to verify")):
+    """Verify a JWT token and return the payload if valid."""
+    payload = verify_access_token(token)
+    if not payload:
+        return JSONResponse(status_code=401, content={"valid": False, "error": "Invalid or expired token"})
+    return {"valid": True, "user": payload}
 
 
 if __name__ == "__main__":

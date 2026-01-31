@@ -51,7 +51,14 @@ The token contains:
 ```
 
 ### 4. Verify the token
-Use the same `SECRET_KEY` to verify tokens in your backend:
+
+**Option A: Use the verify endpoint (no secret needed)**
+```javascript
+const res = await fetch(`https://your-miauauth.com/auth/verify?token=${token}`);
+const { valid, user } = await res.json();
+```
+
+**Option B: Verify locally (share SECRET_KEY with your backend)**
 ```python
 import jwt
 payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -63,6 +70,7 @@ payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
 |----------|-------------|
 | `GET /auth/login` | Redirects to osu! OAuth |
 | `GET /auth/callback` | Handles OAuth callback, redirects with JWT |
+| `GET /auth/verify?token=xxx` | Verify token, returns `{ valid, user }` |
 | `GET /health` | Health check |
 
 ## Configuration
