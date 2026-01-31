@@ -1,45 +1,47 @@
-# MiauAuth
+<p align="center">
+  <img src="assets/logo.png" alt="MiauAuth" width="128">
+</p>
 
-osu! OAuth identity provider. Authenticates users via osu! and returns a JWT with their profile data.
+<h1 align="center">MiauAuth</h1>
 
-## Setup
+<p align="center">
+  osu! OAuth identity provider — authenticate users and get JWTs with their profile data.
+</p>
 
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+<p align="center">
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#integration">Integration</a> •
+  <a href="#endpoints">Endpoints</a> •
+  <a href="#deployment">Deployment</a>
+</p>
 
-2. Create an osu! OAuth application at https://osu.ppy.sh/home/account/edit#oauth
+---
 
-3. Copy `.env.example` to `.env` and configure:
-   ```bash
-   cp .env.example .env
-   ```
+## Quick Start
 
-4. Run:
-   ```bash
-   python main.py
-   ```
+```bash
+pip install -r requirements.txt
+cp .env.example .env
+# Configure your osu! OAuth credentials
+python main.py
+```
+
+Create an osu! OAuth app at [osu.ppy.sh/home/account/edit#oauth](https://osu.ppy.sh/home/account/edit#oauth)
 
 ## Integration
 
-### 1. Redirect to login
+**1. Redirect to login**
 ```javascript
-window.location.href = 'https://your-miauauth-instance.com/auth/login';
+window.location.href = 'https://your-miauauth.com/auth/login';
 ```
 
-### 2. Handle the callback
-After auth, user is redirected back with `?token=<jwt>`:
+**2. Handle callback**
 ```javascript
-const params = new URLSearchParams(window.location.search);
-const token = params.get('token');
-if (token) {
-  localStorage.setItem('token', token);
-}
+const token = new URLSearchParams(location.search).get('token');
+if (token) localStorage.setItem('token', token);
 ```
 
-### 3. JWT Payload
-The token contains:
+**3. JWT payload**
 ```json
 {
   "osu_id": 12345678,
@@ -50,18 +52,14 @@ The token contains:
 }
 ```
 
-### 4. Verify the token
-
-**Option A: Use the verify endpoint (no secret needed)**
+**4. Verify tokens**
 ```javascript
-const res = await fetch(`https://your-miauauth.com/auth/verify?token=${token}`);
-const { valid, user } = await res.json();
-```
+// Option A: Use verify endpoint (no secret needed)
+const { valid, user } = await fetch(`/auth/verify?token=${token}`).then(r => r.json());
 
-**Option B: Verify locally (share SECRET_KEY with your backend)**
-```python
-import jwt
-payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+// Option B: Verify locally with shared SECRET_KEY
+import jwt from 'jsonwebtoken';
+const payload = jwt.verify(token, SECRET_KEY);
 ```
 
 ## Endpoints
@@ -69,34 +67,27 @@ payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
 | Endpoint | Description |
 |----------|-------------|
 | `GET /auth/login` | Redirects to osu! OAuth |
-| `GET /auth/callback` | Handles OAuth callback, redirects with JWT |
+| `GET /auth/callback` | OAuth callback, redirects with JWT |
 | `GET /auth/verify?token=xxx` | Verify token, returns `{ valid, user }` |
 | `GET /health` | Health check |
 
 ## Deployment
 
-### Docker
+**Docker**
 ```bash
 docker build -t miauauth .
 docker run -p 8001:8001 --env-file .env miauauth
 ```
 
-### AWS Lambda
-
-**Option A: Manual zip upload**
+**AWS Lambda**
 ```bash
-cd lambda && chmod +x build.sh && ./build.sh
-```
-Upload `lambda/deployment.zip` to Lambda, set handler to `main.handler`.
+# Manual zip
+./lambda/build.sh
+# Upload lambda/deployment.zip, handler: main.handler
 
-**Option B: SAM**
-```bash
-cd lambda
-sam build
-sam deploy --guided
+# Or use SAM
+cd lambda && sam build && sam deploy --guided
 ```
-
-Configure env vars in Lambda console or via SAM parameters.
 
 ## Configuration
 
@@ -104,7 +95,11 @@ Configure env vars in Lambda console or via SAM parameters.
 |----------|-------------|
 | `OSU_CLIENT_ID` | osu! OAuth client ID |
 | `OSU_CLIENT_SECRET` | osu! OAuth client secret |
-| `OSU_REDIRECT_URI` | Callback URL (must match osu! app settings) |
-| `SECRET_KEY` | JWT signing key (share with your backend) |
+| `OSU_REDIRECT_URI` | Callback URL (must match osu! settings) |
+| `SECRET_KEY` | JWT signing key |
 | `ALLOWED_ORIGINS` | CORS origins (comma-separated) |
 | `DEFAULT_REDIRECT` | Fallback redirect URL |
+
+## License
+
+MIT
